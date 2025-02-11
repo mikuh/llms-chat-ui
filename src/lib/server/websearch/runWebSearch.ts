@@ -1,104 +1,118 @@
-import { defaultEmbeddingModel, embeddingModels } from "$lib/server/embeddingModels";
+import { MarkdownElementType } from "$lib/server/websearch/markdown/types";
+import { removeParents } from "$lib/server/websearch/markdown/tree";
 
 import type { Conversation } from "$lib/types/Conversation";
 import type { Message } from "$lib/types/Message";
-import type { WebSearch, WebSearchScrapedSource } from "$lib/types/WebSearch";
+import type { WebSearch, WebSearchScrapedSource, WebSearchUsedSource } from "$lib/types/WebSearch";
 import type { Assistant } from "$lib/types/Assistant";
 import type { MessageWebSearchUpdate } from "$lib/types/MessageUpdate";
 
 import { search } from "./search/search";
-import { scrape } from "./scrape/scrape";
-import { findContextSources } from "./embed/embed";
-import { removeParents } from "./markdown/tree";
 import {
-	makeErrorUpdate,
-	makeFinalAnswerUpdate,
-	makeGeneralUpdate,
-	makeSourcesUpdate,
+    makeErrorUpdate,
+    makeFinalAnswerUpdate,
+    makeSourcesUpdate,
+    makeGeneralUpdate,
 } from "./update";
-import { mergeAsyncGenerators } from "$lib/utils/mergeAsyncGenerators";
+
 import { MetricsServer } from "../metrics";
 import { logger } from "$lib/server/logger";
 
-const MAX_N_PAGES_TO_SCRAPE = 8 as const;
-const MAX_N_PAGES_TO_EMBED = 5 as const;
+const MAX_OUTPUT_RESULTS = 5 as const; // 设置最大显示结果数
 
 export async function* runWebSearch(
-	conv: Conversation,
-	messages: Message[],
-	ragSettings?: Assistant["rag"],
-	query?: string
+    conv: Conversation,
+    messages: Message[],
+    ragSettings?: Assistant["rag"],
+    query?: string
 ): AsyncGenerator<MessageWebSearchUpdate, WebSearch, undefined> {
-	const prompt = messages[messages.length - 1].content;
-	const createdAt = new Date();
-	const updatedAt = new Date();
+    const prompt = messages[messages.length - 1].content;
+    const createdAt = new Date();
+    const updatedAt = new Date();
 
-	MetricsServer.getMetrics().webSearch.requestCount.inc();
+    MetricsServer.getMetrics().webSearch.requestCount.inc();
 
-	try {
-		const embeddingModel =
-			embeddingModels.find((m) => m.id === conv.embeddingModel) ?? defaultEmbeddingModel;
-		if (!embeddingModel) {
-			throw Error(`Embedding model ${conv.embeddingModel} not available anymore`);
-		}
+    try {
+        // Step 1: 执行网页搜索
+        const { searchQuery, pages } = yield* search(messages, ragSettings, query);
+        if (pages.length === 0) throw Error("No results found for this search query");
 
-		// Search the web
-		const { searchQuery, pages } = yield* search(messages, ragSettings, query);
-		if (pages.length === 0) throw Error("No results found for this search query");
+        yield makeGeneralUpdate({ message: "Generating search context" });
 
-		// Scrape pages
-		yield makeGeneralUpdate({ message: "Browsing search results" });
+        // Step 2: 直接处理搜索结果
+        const validResults = pages
+            .filter(p => p.snippet) // 过滤掉没有snippet的内容
+            .slice(0, MAX_OUTPUT_RESULTS);
 
-		const allScrapedPages = yield* mergeAsyncGenerators(
-			pages.slice(0, MAX_N_PAGES_TO_SCRAPE).map(scrape(embeddingModel.chunkCharLength))
-		);
-		const scrapedPages = allScrapedPages
-			.filter((p): p is WebSearchScrapedSource => Boolean(p))
-			.filter((p) => p.page.markdownTree.children.length > 0)
-			.slice(0, MAX_N_PAGES_TO_EMBED);
+        // Step 3: 构造上下文数据
+        const contextSources: WebSearchUsedSource[] = validResults.map((result, idx) => {
+            // 构建符合类型要求的虚拟页面结构
+            const placeholderScrapedSource: WebSearchScrapedSource = {
+                title: result.title,
+                link: result.link,
+                page: {
+                    title: result.title || "",
+                    markdownTree: {
+                        type: MarkdownElementType.Root,
+                        children: [
+                            {
+                                type: MarkdownElementType.Paragraph,
+                                content: result.snippet,
+                                children: [],
+                            }
+                        ],
+                        content: result.title + "\n" + result.link,
+                    },
+                    siteName: undefined,
+                    author: undefined,
+                    description: undefined,
+                    createdAt: undefined,
+                    modifiedAt: undefined,
+                }
+            };
+            
+            // 移除markdown树中的父级引用
+            removeParents(placeholderScrapedSource.page.markdownTree);
 
-		if (!scrapedPages.length) {
-			throw Error(`No text found in the first ${MAX_N_PAGES_TO_SCRAPE} results`);
-		}
+            return {
+                ...placeholderScrapedSource,
+                context: result.snippet // 直接将snippet作为context内容
+            };
+        });
 
-		// Chunk the text of each of the elements and find the most similar chunks to the prompt
-		yield makeGeneralUpdate({ message: "Extracting relevant information" });
-		const contextSources = await findContextSources(scrapedPages, prompt, embeddingModel).then(
-			(ctxSources) =>
-				ctxSources.map((source) => ({
-					...source,
-					page: { ...source.page, markdownTree: removeParents(source.page.markdownTree) },
-				}))
-		);
-		yield makeSourcesUpdate(contextSources);
+        yield makeSourcesUpdate(contextSources);
 
-		const webSearch: WebSearch = {
-			prompt,
-			searchQuery,
-			results: scrapedPages.map(({ page, ...source }) => ({
-				...source,
-				page: { ...page, markdownTree: removeParents(page.markdownTree) },
-			})),
-			contextSources,
-			createdAt,
-			updatedAt,
-		};
-		yield makeFinalAnswerUpdate();
-		return webSearch;
-	} catch (searchError) {
-		const message = searchError instanceof Error ? searchError.message : String(searchError);
-		logger.error(message);
-		yield makeErrorUpdate({ message: "An error occurred", args: [message] });
+        // Step 4: 生成最终输出结构
+        const webSearch: WebSearch = {
+            prompt,
+            searchQuery,
+            results: validResults.map(r => ({ 
+                title: r.title, 
+                link: r.link,
+                position: r.position // 保持原始搜索结果的位置信息
+            })),
+            contextSources: contextSources,
+            createdAt,
+            updatedAt,
+        };
+        yield makeFinalAnswerUpdate();
+        return webSearch;
 
-		const webSearch: WebSearch = {
-			prompt,
-			searchQuery: "",
-			results: [],
-			contextSources: [],
-			createdAt,
-			updatedAt,
-		};
-		yield makeFinalAnswerUpdate();
-		return webSearch;
-	}
+    } catch (searchError) {
+        // 错误处理流程保持不变
+        const message = searchError instanceof Error ? searchError.message : String(searchError);
+        logger.error(message);
+        yield makeErrorUpdate({ message: "An error occurred", args: [message] });
+
+        const webSearch: WebSearch = {
+            prompt,
+            searchQuery: "",
+            results: [],
+            contextSources: [],
+            createdAt,
+            updatedAt,
+        };
+        yield makeFinalAnswerUpdate();
+        return webSearch;
+    }
 }

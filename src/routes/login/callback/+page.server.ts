@@ -51,6 +51,13 @@ export async function load({ url, locals, cookies, request, getClientAddress }) 
 		code,
 		iss
 	);
+	
+	if (!userData.name) {
+		userData.name = userData.sub
+	}
+	if (!userData.preferred_username) {
+		userData.preferred_username = userData.sub
+	}
 
 	// Filter by allowed user emails or domains
 	if (allowedUserEmails.length > 0 || allowedUserDomains.length > 0) {

@@ -136,12 +136,7 @@
 			This feature is <span
 				class="rounded-lg bg-purple-100 px-2 py-1 font-semibold dark:bg-purple-800/50"
 				>experimental</span
-			>. Consider
-			<a
-				class="underline hover:text-purple-500"
-				href="https://huggingface.co/spaces/huggingchat/chat-ui/discussions/569"
-				target="_blank">sharing your feedback with us!</a
-			>
+			>. 
 		</h3>
 		<div class="ml-auto mt-6 flex justify-between gap-2 max-sm:flex-col sm:items-center">
 			{#if data.user?.isAdmin}
