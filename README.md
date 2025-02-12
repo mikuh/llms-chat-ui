@@ -1064,3 +1064,5 @@ docker build -t chat-ui-db:latest --build-arg INCLUDE_DB=true .
 docker build -t chat-ui:latest --build-arg INCLUDE_DB=false .
 docker build -t huggingchat:latest --build-arg INCLUDE_DB=false --build-arg APP_BASE=/chat --build-arg PUBLIC_APP_COLOR=yellow .
 ```
+
+docker run 
