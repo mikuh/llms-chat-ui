@@ -17,6 +17,7 @@ services:
       - "3001:3000"
     env_file:
       - .env.local
+    restart: unless-stopped
     depends_on:
       - mongo
       
@@ -26,6 +27,7 @@ services:
       - "3002:3000"
     env_file:
       - .env.local
+    restart: unless-stopped
     depends_on:
       - mongo
 
