@@ -1,0 +1,38 @@
+version: '3.8'
+
+services:
+
+  mongo:
+    container_name: mongo-chatui
+    image: mongo:latest
+    ports:
+      - "27017:27017"
+    restart: unless-stopped
+    volumes:
+      - db:/data
+  
+  chat-ui-1:
+    image: chat-ui:latest
+    ports:
+      - "3001:3000"
+    env_file:
+      - .env.local
+    depends_on:
+      - mongo
+      
+  chat-ui-2:
+    image: chat-ui:latest
+    ports:
+      - "3002:3000"
+    env_file:
+      - .env.local
+    depends_on:
+      - mongo
+
+volumes:
+  db:
+
+
+# docker build -t chat-ui-db:latest --build-arg INCLUDE_DB=true .
+# docker build -t chat-ui:latest --build-arg INCLUDE_DB=false .
+# docker compose --env-file .env.local up

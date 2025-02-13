@@ -12,4 +12,3 @@ SECRET_CONFIG
 !.env.ci
 !.env
 gcp-*.json
-docker-compose.yml
