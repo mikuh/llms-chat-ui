@@ -173,14 +173,14 @@
 		type="button"
 		class="flex h-9 flex-none items-center gap-1.5 rounded-lg pl-2.5 pr-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
 	>
-		Theme
+		主题
 	</button>
 	{#if nModels > 1}
 		<a
 			href="{base}/models"
 			class="flex h-9 flex-none items-center gap-1.5 rounded-lg pl-2.5 pr-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
 		>
-			Models
+			模型
 			<span
 				class="ml-auto rounded-full border border-gray-300 px-2 py-0.5 text-xs text-gray-500 dark:border-gray-500 dark:text-gray-400"
 				>{nModels}</span
@@ -192,7 +192,7 @@
 			href="{base}/assistants"
 			class="flex h-9 flex-none items-center gap-1.5 rounded-lg pl-2.5 pr-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
 		>
-			Assistants
+			智能体
 		</a>
 	{/if}
 	{#if $page.data.enableCommunityTools}
@@ -200,7 +200,7 @@
 			href="{base}/tools"
 			class="flex h-9 flex-none items-center gap-1.5 rounded-lg pl-2.5 pr-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
 		>
-			Tools
+			工具
 			<span
 				class="ml-auto rounded-full border border-purple-300 px-2 py-0.5 text-xs text-purple-500 dark:border-purple-500 dark:text-purple-400"
 				>New</span
@@ -212,14 +212,14 @@
 		href="{base}/settings"
 		class="flex h-9 flex-none items-center gap-1.5 rounded-lg pl-2.5 pr-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
 	>
-		Settings
+		设置
 	</a>
-	{#if envPublic.PUBLIC_APP_NAME === "HuggingChat"}
-		<a
-			href="{base}/privacy"
-			class="flex h-9 flex-none items-center gap-1.5 rounded-lg pl-2.5 pr-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
-		>
-			About & Privacy
-		</a>
-	{/if}
+	
+	<a
+		href="{base}/privacy"
+		class="flex h-9 flex-none items-center gap-1.5 rounded-lg pl-2.5 pr-2 text-gray-500 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-700"
+	>
+		捐助算力
+	</a>
+	
 </div>

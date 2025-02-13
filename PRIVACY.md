@@ -1,42 +1,15 @@
-## Privacy
+### 支持LLMsChat平台，助力公益AI项目
 
-> Last updated: April 15, 2024
+LLMsChat平台是一个免费的公益项目，目前由我个人出资支持，旨在为大家提供优质的AI服务。然而，由于项目的持续运营需要一定的资金支持，未来当资金耗尽时，平台可能会面临关闭的风险。为了保证平台能够继续为大家提供服务，我诚挚地欢迎大家捐助算力。每一笔捐助将专门用于购买算力，以支付服务器的开支和确保平台的持续运作。
 
-Users of HuggingChat are authenticated through their HF user account.
+扫描下方二维码进行捐助，您的每一份支持都至关重要，帮助我们维持平台的正常运营。
+<img src="http://localhost:5173/chatui/WechatPay.jpg" width="300">
 
-We endorse Privacy by Design. As such, your conversations are private to you and will not be shared with anyone, including model authors, for any purpose, including for research or model training purposes.
+同时，欢迎加入我们的Telegram群组，与大家一起讨论平台的发展和AI技术的前沿动态。如果您有其他模型或者功能的建议或需求，也可以在群里与我联系，我们可以共同探讨如何实现更多功能。
 
-You conversation data will only be stored to let you access past conversations. You can click on the Delete icon to delete any past conversation at any moment.
+<a target="_blank" href="https://t.me/+DpUFxHcNz902YTJl">加入Telegram群组</a>
 
-🗓 Please also consult huggingface.co's main privacy policy at <https://huggingface.co/privacy>. To exercise any of your legal privacy rights, please send an email to <privacy@huggingface.co>.
 
-## About available LLMs
+感谢大家的支持与帮助！
 
-The goal of this app is to showcase that it is now possible to build an open source alternative to ChatGPT. 💪
 
-We aim to always provide a diverse set of state of the art open LLMs, hence we rotate the available models over time.
-
-Historically, HuggingChat has been running models such as:
-
-- [Llama 2 70B](https://huggingface.co/meta-llama/Llama-2-70b-chat-hf)
-- [CodeLlama 35B](https://about.fb.com/news/2023/08/code-llama-ai-for-coding/)
-- [Falcon 180B](https://www.tii.ae/news/technology-innovation-institute-introduces-worlds-most-powerful-open-llm-falcon-180b)
-- [Mistral 7B](https://mistral.ai/news/announcing-mistral-7b/)
-- [Cohere Command R+](https://huggingface.co/chat/models/CohereForAI/c4ai-command-r-plus)
-- [Google Gemma 7B](https://huggingface.co/chat/models/google/gemma-1.1-7b-it)
-
-This is only a partial list. Check the [models](https://huggingface.co/chat/models/) page for up-to-date list of the best available LLMs.
-
-## Technical details
-
-This app is running in a [Space](https://huggingface.co/docs/hub/spaces-overview), which entails that the code for this UI is publicly visible [inside the Space repo](https://huggingface.co/spaces/huggingchat/chat-ui/tree/main).
-
-**Further development takes place on the [huggingface/chat-ui GitHub repo](https://github.com/huggingface/chat-ui).**
-
-The inference backend is running the optimized [text-generation-inference](https://github.com/huggingface/text-generation-inference) on HuggingFace's Inference API infrastructure.
-
-It is therefore possible to deploy a copy of this app to a Space and customize it (swap model, add some UI elements, or store user messages according to your own Terms and conditions). You can also 1-click deploy your own instance using the [Chat UI Spaces Docker template](https://huggingface.co/new-space?template=huggingchat/chat-ui-template).
-
-We welcome any feedback on this app: please participate to the public discussion at <https://huggingface.co/spaces/huggingchat/chat-ui/discussions>
-
-<a target="_blank" href="https://huggingface.co/spaces/huggingchat/chat-ui/discussions"><img src="https://huggingface.co/datasets/huggingface/badges/raw/main/open-a-discussion-xl.svg" title="open a discussion"></a>
