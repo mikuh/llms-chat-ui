@@ -37,4 +37,4 @@ volumes:
 
 # docker build -t chat-ui-db:latest --build-arg INCLUDE_DB=true .
 # docker build -t chat-ui:latest --build-arg INCLUDE_DB=false .
-# docker compose --env-file .env.local up
+# sudo docker compose --env-file .env.local up
